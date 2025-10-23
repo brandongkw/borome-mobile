@@ -1,50 +1,131 @@
-# Welcome to your Expo app 👋
+# BoroMe Mobile (Expo + Firebase)
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A cross-platform React Native (Expo) prototype for the BoroMe MVP redesign.  
+This app demonstrates the complete **listing creation** and **booking** experience, using **Firebase** for auth, Firestore, and storage.
 
-## Get started
+## Key Features
+- **Account split:** Personal vs Business onboarding (sign-up flow).
+- **Listing creation:** Details → Category/Subcategory → Condition → Pricing & Fees → Delivery/Pickup → Availability (date-range + blockouts) → Summary.
+- **Booking flow:** Create and view bookings with live updates.
+- **Browse & My Bookings:** Real-time Firestore reads with pull-to-refresh and optimistic UI.
+- **MVP-aligned styling:** Updated components to match partner branding & UX.
+- **Map view scaffold:** Layout prepared for `expo-maps` (optional key required).
 
-1. Install dependencies
+## Tech Stack
+- **React Native** (Expo)
+- **TypeScript**
+- **Firebase** (Auth, Firestore, Storage)
+- **Expo Router** or React Navigation
+- **Zustand/Context** for lightweight state
+- **ESLint + Prettier**
 
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+## Repository Structure
+```
+borome-mobile/
+  app/ or src/
+    screens/
+    components/
+    navigation/
+    hooks/
+    services/
+      firebase.ts
+      listings.ts
+      bookings.ts
+    state/
+  assets/
+  app.json / app.config.ts
+  package.json
+  README.md
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Environment Setup
 
-## Learn more
+1) **Install prerequisites**
+- Node LTS (v18+), Yarn or npm  
+- Expo CLI: `npm i -g expo`
 
-To learn more about developing your project with Expo, look at the following resources:
+2) **Create `.env`**
+```
+EXPO_PUBLIC_FIREBASE_API_KEY=YOUR_API_KEY
+EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+EXPO_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
+EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=000000000000
+EXPO_PUBLIC_FIREBASE_APP_ID=1:000000000000:web:abcdef123456
+EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID=G-XXXXXXX
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+3) **Install deps**
+```bash
+npm install
+# or
+yarn
+```
 
-## Join the community
+## Run & Test
 
-Join our community of developers creating universal apps.
+### Option A — Expo Go
+```bash
+npm start
+# or
+expo start
+```
+- Scan QR with **Expo Go** on iOS/Android.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+### Option B — Emulator
+- Android Studio → `expo start --android`
+- macOS/iOS → `expo start --ios`
+
+## First-Run Flow
+1. **Sign-Up / Login**
+2. **Create Listing**
+3. **Booking**
+4. **Refresh/Sync**
+
+## Data Model (Firestore)
+- `users/{uid}`
+- `listings/{listingId}`
+- `bookings/{bookingId}`
+- `availability/{listingId}/blocks/{blockId}`
+
+## User Testing (SUS)
+Run through **listing creation**, **browse**, and **booking**; record time-to-task, errors, and SUS scores.
+
+## 🗺️ Maps (optional)
+Enable `expo-maps` with a Google Maps key if desired.
+
+## Scripts
+```bash
+npm start
+npm run lint
+npx expo prebuild
+```
+
+## Troubleshooting
+- Clear cache: `expo start -c`
+- Check Firebase rules if Firestore fails.
+- Verify ProjectID if no data appears.
+
+## Build
+```bash
+npm install -g eas-cli
+eas login
+eas build -p android
+```
+
+## Licence
+Internal academic prototype for the BoroMe Capstone.
+
+---
+
+## Zip command
+
+### Windows PowerShell
+```powershell
+Compress-Archive -Path ".\borome-mobile\*" -DestinationPath ".\artefact\borome-mobile_2025-10-22.zip" -Force
+```
+
+### macOS/Linux
+```bash
+zip -r ./artefact/borome-mobile_2025-10-22.zip ./borome-mobile -x "*/node_modules/*" "*/.git/*" "*/.expo/*"
+```

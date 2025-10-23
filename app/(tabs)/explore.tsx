@@ -1,112 +1,88 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+// app/(tabs)/explore.tsx
+import { Stack, useFocusEffect } from "expo-router";
+import { collection, doc, getDoc, getDocs, orderBy, query, where } from "firebase/firestore";
+import React, { useCallback, useState } from "react";
+import { Alert, FlatList, RefreshControl, Text, View } from "react-native";
+import { db } from "../../lib/firebase";
 
-import { Collapsible } from '@/components/ui/collapsible';
-import { ExternalLink } from '@/components/external-link';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Fonts } from '@/constants/theme';
+type Booking = {
+  id: string;
+  listingId: string;
+  startDate: number; // ms
+  endDate: number;   // ms
+  status: "confirmed" | "blocked";
+};
 
-export default function TabTwoScreen() {
+type Row = Booking & { listingTitle?: string };
+
+const DEMO_OWNER = "owner-demo-1"; // keep as-is for now
+
+export default function MyBookings() {
+  const [rows, setRows] = useState<Row[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const load = async () => {
+    try {
+      setRefreshing(true);
+      // get my bookings (simple: borrowerId == DEMO_OWNER)
+      const q = query(
+        collection(db, "bookings"),
+        where("borrowerId", "==", DEMO_OWNER),
+        orderBy("startDate", "desc")
+      );
+      const snap = await getDocs(q);
+      const bookings: Booking[] = snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) }));
+
+      // fetch listing titles (simple N calls — fine for our scale)
+      const withTitle: Row[] = [];
+      for (const b of bookings) {
+        let listingTitle: string | undefined;
+        try {
+          const ldoc = await getDoc(doc(db, "listings", b.listingId));
+          listingTitle = ldoc.exists() ? (ldoc.data() as any).title : undefined;
+        } catch {}
+        withTitle.push({ ...b, listingTitle });
+      }
+      setRows(withTitle);
+    } catch (e: any) {
+      Alert.alert("Error", e?.message ?? String(e));
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      load();
+    }, [])
+  );
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText
-          type="title"
-          style={{
-            fontFamily: Fonts.rounded,
-          }}>
-          Explore
-        </ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image
-          source={require('@/assets/images/react-logo.png')}
-          style={{ width: 100, height: 100, alignSelf: 'center' }}
-        />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful{' '}
-          <ThemedText type="defaultSemiBold" style={{ fontFamily: Fonts.mono }}>
-            react-native-reanimated
-          </ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
+    <View style={{ flex: 1, backgroundColor: "#fff" }}>
+      <Stack.Screen options={{ title: "My bookings" }} />
+      <FlatList
+        data={rows}
+        keyExtractor={(i) => i.id}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={load} />}
+        contentContainerStyle={{ padding: 16, gap: 12 }}
+        renderItem={({ item }) => {
+          const start = new Date(item.startDate);
+          const end = new Date(item.endDate);
+          const title = item.listingTitle ?? item.listingId; // fallback
+          return (
+            <View style={{ borderRadius: 14, borderWidth: 1, borderColor: "#e5e7eb", padding: 14 }}>
+              <Text style={{ fontWeight: "800", fontSize: 18 }}>{title}</Text>
+              <Text style={{ marginTop: 4 }}>
+                {start.toDateString()} → {end.toDateString()}
+              </Text>
+              <Text style={{ marginTop: 4, color: "#666" }}>Status: {item.status}</Text>
+            </View>
+          );
+        }}
+        ListEmptyComponent={
+          <Text style={{ padding: 16, color: "#666" }}>No bookings yet.</Text>
+        }
+      />
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
-  },
-  titleContainer: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-});
