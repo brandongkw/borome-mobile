@@ -1,50 +1,54 @@
-# BoroMe Mobile (Expo + Firebase)
+# Mobile Listing & Booking Prototype (Expo + Firebase)
 
-A cross-platform React Native (Expo) prototype for the BoroMe MVP redesign.  
-This app demonstrates the complete **listing creation** and **booking** experience, using **Firebase** for auth, Firestore, and storage.
+A cross-platform mobile prototype demonstrating a **full listing creation** and **booking** experience.  
+Built with **Expo (React Native)** and **Firebase** (Auth, Firestore, Storage). Designed for rapid iteration, user testing, and MVP-style delivery.
 
-## Key Features
-- **Account split:** Personal vs Business onboarding (sign-up flow).
-- **Listing creation:** Details → Category/Subcategory → Condition → Pricing & Fees → Delivery/Pickup → Availability (date-range + blockouts) → Summary.
-- **Booking flow:** Create and view bookings with live updates.
-- **Browse & My Bookings:** Real-time Firestore reads with pull-to-refresh and optimistic UI.
-- **MVP-aligned styling:** Updated components to match partner branding & UX.
-- **Map view scaffold:** Layout prepared for `expo-maps` (optional key required).
+## Overview
+This project showcases my experience in **mobile app development**, focusing on:
+- Turning user research and feedback into UI/UX improvements.
+- Implementing real-time, data-driven features using Firebase.
+- Applying usability testing methodologies such as **System Usability Scale (SUS)**.
+- Structuring a full cross-platform mobile app lifecycle from design → implementation → evaluation.
+
+## Features
+- **Account Split:** Personal and Business onboarding with distinct sign-up flows.
+- **Listing Creation:** Details → Category → Condition → Pricing → Delivery/Pickup → Availability → Summary → Publish.
+- **Booking Flow:** Create and view bookings with live updates via Firestore.
+- **Browse & My Bookings:** Real-time reads with pull-to-refresh and user-specific listings.
+- **Maps-Ready Layout:** Scaffold for `expo-maps` integration.
+- **SUS Testing Support:** Designed for user evaluation and feedback collection.
 
 ## Tech Stack
-- **React Native** (Expo)
-- **TypeScript**
+- **React Native (Expo)**
 - **Firebase** (Auth, Firestore, Storage)
-- **Expo Router** or React Navigation
-- **Zustand/Context** for lightweight state
+- **React Navigation / Expo Router**
+- **State Management:** Context / Zustand
 - **ESLint + Prettier**
+- **(Optional)** TypeScript
 
-## Repository Structure
+## Folder Structure
 ```
-borome-mobile/
-  app/ or src/
-    screens/
-    components/
-    navigation/
-    hooks/
-    services/
-      firebase.ts
-      listings.ts
-      bookings.ts
-    state/
-  assets/
-  app.json / app.config.ts
-  package.json
-  README.md
+src/
+  screens/        # Feature screens
+  components/     # Reusable UI components
+  services/       # Firebase + data logic
+  state/          # Global state management
+  navigation/     # Navigation setup
+docs/
+  listing-flow.png
+  booking.png
 ```
 
-## Environment Setup
+## Setup
 
-1) **Install prerequisites**
-- Node LTS (v18+), Yarn or npm  
-- Expo CLI: `npm i -g expo`
+### 1. Install dependencies
+```bash
+npm install -g expo
+npm install
+```
 
-2) **Create `.env`**
+### 2. Environment configuration
+Create `.env` (not committed) from the provided example:
 ```
 EXPO_PUBLIC_FIREBASE_API_KEY=YOUR_API_KEY
 EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
@@ -55,77 +59,57 @@ EXPO_PUBLIC_FIREBASE_APP_ID=1:000000000000:web:abcdef123456
 EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID=G-XXXXXXX
 ```
 
-3) **Install deps**
-```bash
-npm install
-# or
-yarn
-```
-
-## Run & Test
-
-### Option A — Expo Go
+### 3. Run the app
 ```bash
 npm start
 # or
 expo start
 ```
-- Scan QR with **Expo Go** on iOS/Android.
+Then scan the QR code with **Expo Go** or run:
+- **Android:** `expo start --android`
+- **iOS (macOS):** `expo start --ios`
 
-### Option B — Emulator
-- Android Studio → `expo start --android`
-- macOS/iOS → `expo start --ios`
-
-## First-Run Flow
-1. **Sign-Up / Login**
-2. **Create Listing**
-3. **Booking**
-4. **Refresh/Sync**
+## Usage Guide
+1. **Sign Up / Login** — Choose account type (Personal or Business).
+2. **Create a Listing** — Follow guided steps through all listing pages.
+3. **Browse** — View published listings.
+4. **Book** — Select available dates and confirm booking.
+5. **My Bookings** — Manage created bookings, view status, and cancel if necessary.
 
 ## Data Model (Firestore)
-- `users/{uid}`
-- `listings/{listingId}`
-- `bookings/{bookingId}`
-- `availability/{listingId}/blocks/{blockId}`
+- `users/{uid}` — account details & type
+- `listings/{listingId}` — listing info & availability
+- `bookings/{bookingId}` — booking data linked to listings
 
-## User Testing (SUS)
-Run through **listing creation**, **browse**, and **booking**; record time-to-task, errors, and SUS scores.
+## What I Learned
+- Building complete **mobile MVPs** with rapid iteration loops.
+- Integrating Firebase for seamless data synchronization.
+- Applying **usability testing** (SUS) and interpreting results to inform design.
+- Balancing **performance, usability, and development speed** using Expo.
 
-## 🗺️ Maps (optional)
-Enable `expo-maps` with a Google Maps key if desired.
+## Screenshots
+Include images in `docs/`:
+```
+docs/listing-flow.png
+docs/booking.png
+```
+
+## Testing & Evaluation
+This prototype was evaluated using user testing with a **System Usability Scale** (SUS) approach. The tests focused on flow comprehension, navigation speed, and satisfaction metrics.
 
 ## Scripts
 ```bash
-npm start
-npm run lint
-npx expo prebuild
+npm start       # start the Expo dev server
+npm run lint    # run ESLint checks
+npx expo prebuild  # prepare native builds if required
 ```
 
-## Troubleshooting
-- Clear cache: `expo start -c`
-- Check Firebase rules if Firestore fails.
-- Verify ProjectID if no data appears.
+## Optional Maps Integration
+Enable `expo-maps` and add your API key to integrate geolocation-based listing views.
 
-## Build
-```bash
-npm install -g eas-cli
-eas login
-eas build -p android
-```
-
-## Licence
-Internal academic prototype for the BoroMe Capstone.
+## License
+This project is released under the [MIT License](./LICENSE).
 
 ---
 
-## Zip command
-
-### Windows PowerShell
-```powershell
-Compress-Archive -Path ".\borome-mobile\*" -DestinationPath ".\artefact\borome-mobile_2025-10-22.zip" -Force
-```
-
-### macOS/Linux
-```bash
-zip -r ./artefact/borome-mobile_2025-10-22.zip ./borome-mobile -x "*/node_modules/*" "*/.git/*" "*/.expo/*"
-```
+> This repository represents an educational and portfolio project built to demonstrate technical proficiency in mobile development, UI/UX design, and Firebase integration. Not intended for production use without security and scalability review.
